@@ -5,7 +5,7 @@ import "fmt"
 func main() {
 	even := make(chan int)
 	odd := make(chan int)
-	quit := make(chan int)
+	quit := make(chan bool)
 
 	// Send values onto the channel
 	go send(even, odd, quit)
@@ -15,21 +15,30 @@ func main() {
 
 }
 
-func receive(e, o, q <-chan int) {
+func receive(e, o <-chan int, q <-chan bool) {
 	for {
 		select {
-		case v := <-e:
+		case v, ok := <-e:
+			if !ok {
+				continue
+			}
 			fmt.Println("Got an even value:", v)
-		case v := <-o:
+		case v, ok := <-o:
+			if !ok {
+				continue
+			}
 			fmt.Println("Got an odd value:", v)
-		case <-q:
+		case _, ok := <-q:
+			if !ok {
+				continue
+			}
 			fmt.Println("Quitting..")
 			return
 		}
 	}
 }
 
-func send(e, o, q chan<- int) {
+func send(e, o chan<- int, q chan<- bool) {
 	for i := 0; i < 100; i++ {
 		if i%2 == 0 {
 			e <- i
@@ -37,5 +46,8 @@ func send(e, o, q chan<- int) {
 			o <- i
 		}
 	}
-	q <- 0
+	close(e)
+	close(o)
+	q <- true
+	close(q)
 }
