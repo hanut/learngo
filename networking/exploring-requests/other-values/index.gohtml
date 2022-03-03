@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Forms via GET request</title>
+    <style>
+      html,
+      body {
+        padding: 0;
+        margin: 0;
+        font-family: "Courier New", Courier, monospace;
+      }
+      body * {
+        margin: inherit;
+        padding: inherit;
+        font-family: inherit;
+      }
+      main {
+        width: 960px;
+        margin: 0 auto;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: start;
+        align-items: center;
+      }
+      .row,
+      .col {
+        margin: 0.25rem 0;
+        padding: 0.25rem .5rem;
+        display: flex;
+        justify-content: start;
+        align-items: center;
+      }
+      .row {
+        flex-direction: row;
+      }
+      .col {
+        flex-direction: column;
+      }
+      hr {
+        width: 100%;
+        height: 1px;
+        padding: 0;
+      }
+      input {
+        margin-block: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Form Tester</h1>
+      <hr />
+      <p><strong>Request Details</strong></p>
+      <hr />
+      <div class="row">
+        <p>
+          <strong>METHOD</strong>
+        </p>
+        {{.RequestDetails.Method}}
+      </div>
+      <div class="row">
+        <p>
+          <strong>PATH</strong>
+        </p>
+        {{.RequestDetails.Path}}
+      </div>
+      <div class="row">
+        <p>
+          <strong>HEADER</strong>
+        </p>
+        {{.RequestDetails.Header}}
+      </div>
+      <div class="row">
+        <p>
+          <strong>HOST</strong>
+        </p>
+        {{.RequestDetails.Host}}
+      </div>
+      <div class="row">
+        <p>
+          <strong>CONTENT LENGTH</strong>
+        </p>
+        {{.RequestDetails.ContentLength}}
+      </div>
+      <hr />
+      {{if .Submissions}}
+      <p><strong>Identifiers</strong> & <em>values</em></p>
+      <hr />
+      {{range $key,$value := .Submissions}}
+      <div class="row">
+        <p>
+          <strong>{{ $key }}</strong>
+        </p>
+        {{range $value}} <em> {{ . }} </em> {{ end }}
+      </div>
+      <hr />
+      {{ end }}
+      {{ end }}
+      <form action="/" method="post">
+        <div class="col">
+          <input type="text" name="fname" placeholder="Full Name" />
+          <input type="password" name="pass" placeholder="Password" />
+          <button type="submit">Submit</button>
+        </div>
+      </form>
+    </main>
+  </body>
+</html>

@@ -10,3 +10,5 @@ of the go programming language such as
 5. Channels
 6. Concurrency primitives
 7. The writer interface, JSON marshalling & unmarshalling, bcrypt hashing & sorting
+8. Network related programs including the http package, creating tcp servers and clients 
+and other network programming
