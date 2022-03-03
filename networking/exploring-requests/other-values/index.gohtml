@@ -24,6 +24,9 @@
         justify-content: start;
         align-items: center;
       }
+      main * {
+        flex: 1;
+      }
       .row,
       .col {
         margin: 0.25rem 0;
@@ -55,34 +58,26 @@
       <p><strong>Request Details</strong></p>
       <hr />
       <div class="row">
-        <p>
-          <strong>METHOD</strong>
-        </p>
+        <h3>METHOD</h3>
         {{.RequestDetails.Method}}
       </div>
       <div class="row">
-        <p>
-          <strong>PATH</strong>
-        </p>
+        <h3>PATH</h3>
         {{.RequestDetails.Path}}
       </div>
       <div class="row">
-        <p>
-          <strong>HEADER</strong>
-        </p>
-        {{.RequestDetails.Header}}
-      </div>
-      <div class="row">
-        <p>
-          <strong>HOST</strong>
-        </p>
+        <h3>HOST</h3>
         {{.RequestDetails.Host}}
       </div>
       <div class="row">
-        <p>
-          <strong>CONTENT LENGTH</strong>
-        </p>
+        <h3>CONTENT LENGTH</h3>
         {{.RequestDetails.ContentLength}}
+      </div>
+      <div class="col">
+        <h3>HEADERS</h3>
+        {{range $key,$value := .RequestDetails.Header}}
+        <p><strong>{{$key}}:</strong>{{$value}}</p>
+        {{end}}
       </div>
       <hr />
       {{if .Submissions}}
@@ -95,9 +90,9 @@
         </p>
         {{range $value}} <em> {{ . }} </em> {{ end }}
       </div>
-      <hr />
       {{ end }}
       {{ end }}
+      <hr/>
       <form action="/" method="post">
         <div class="col">
           <input type="text" name="fname" placeholder="Full Name" />
