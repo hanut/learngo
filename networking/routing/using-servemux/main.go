@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 )
@@ -34,6 +35,19 @@ func init() {
 	}
 }
 
+func handlerFunc(res http.ResponseWriter, req *http.Request) {
+	st := time.Now()
+
+	_, err := res.Write([]byte("Response from handler function"))
+
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	fmt.Printf("%s -> %s %s [%v]\n", req.RemoteAddr, req.Method, req.URL, time.Since(st))
+
+}
+
 // Main application function that starts the server
 func main() {
 	fmt.Println("ServeMux versioned api listening at 3001")
@@ -46,6 +60,9 @@ func main() {
 	// The next handler doesnt catch anything except the /v3
 	// because of a missing trailing slash
 	mux.Handle("/v3", &apiV2)
+
+	// Example of a handler function
+	mux.HandleFunc("/handler/", handlerFunc)
 
 	http.ListenAndServe("localhost:3001", mux)
 }
