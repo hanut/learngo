@@ -22,17 +22,15 @@
         display: flex;
         flex-direction: column;
         justify-content: start;
-        align-items: center;
-      }
-      main * {
-        flex: 1;
+        align-items: stretch;
       }
       .row,
       .col {
+        flex:1;
         margin: 0.25rem 0;
         padding: 0.25rem .5rem;
         display: flex;
-        justify-content: start;
+        justify-content: space-between;
         align-items: center;
       }
       .row {
@@ -59,26 +57,29 @@
       <hr />
       <div class="row">
         <h3>METHOD</h3>
-        {{.RequestDetails.Method}}
+        <p>{{.RequestDetails.Method}}</p>
       </div>
       <div class="row">
         <h3>PATH</h3>
-        {{.RequestDetails.Path}}
+        <p>{{.RequestDetails.Path}}</p>
       </div>
       <div class="row">
         <h3>HOST</h3>
-        {{.RequestDetails.Host}}
+        <p>{{.RequestDetails.Host}}</p>
       </div>
       <div class="row">
         <h3>CONTENT LENGTH</h3>
-        {{.RequestDetails.ContentLength}}
+        <p>{{.RequestDetails.ContentLength}}</p>
       </div>
-      <div class="col">
-        <h3>HEADERS</h3>
-        {{range $key,$value := .RequestDetails.Header}}
-        <p><strong>{{$key}}:</strong>{{$value}}</p>
-        {{end}}
+      <hr />
+      <p><strong>Request Headers</strong></p>
+      <hr />
+      {{range $key,$value := .RequestDetails.Header}}
+      <div class="row">
+        <h3>{{$key}}</h3>
+        <div style="overflow: hidden;overflow-wrap: break-word;">{{range $value}}{{.}}{{end}}</div>
       </div>
+      {{end}}
       <hr />
       {{if .Submissions}}
       <p><strong>Identifiers</strong> & <em>values</em></p>

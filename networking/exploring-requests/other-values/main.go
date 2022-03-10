@@ -63,7 +63,7 @@ func main() {
 	app := myHttpServer{
 		Host:    "localhost",
 		Port:    3001,
-		AppName: "Forms Microservice 1",
+		AppName: "Forms Microservice 2",
 		Env:     "development",
 	}
 
