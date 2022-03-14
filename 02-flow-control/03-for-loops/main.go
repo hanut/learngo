@@ -3,10 +3,14 @@ package main
 import "fmt"
 
 func main() {
-	names := []string{"Mark", "Tony", "Bittu", "Gajendra", "Carl"}
+	fmt.Println("Looping in Golang")
+
+	// Define an array of 5 string names
+	names := [5]string{"Mark", "Tony", "Bittu", "Gajendra", "Carl"}
+
 	fmt.Println("\nIteration using simple for loop")
 	for i := 0; i < len(names); i++ {
-		fmt.Println(i+1, names[i])
+		fmt.Printf("%d.\t%s\n", i+1, names[i])
 	}
 
 	fmt.Println("\nIteration using range")

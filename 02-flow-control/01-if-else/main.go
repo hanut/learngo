@@ -9,12 +9,43 @@ type Person struct {
 }
 
 func main() {
+	fmt.Println("Checking out if-else")
+
 	rating := 7
 
+	// If the rating is less than 5, let the person know it isn't good
+	// otherwise tell them its awesome
 	if rating < 5 {
 		fmt.Printf("A rating of %d is not that great:\n", rating)
 	} else {
 		fmt.Printf("%d is a superb rating !\n", rating)
+	}
+
+	pi := 3.14
+
+	// If pi == 1, everything is messed up, otherwise
+	// if pi is still correct then the universe will survive
+	// For all other cases the universe ends
+	if pi == 1 {
+		fmt.Println("We were wrong all along !")
+	} else if pi == 3.14 {
+		fmt.Println("The universe will survive")
+	} else {
+		fmt.Println("The universe fades to black...")
+	}
+
+	// Nested if-else
+	// Generally try to avoid nested if else blocks as they lead
+	// to unreadable code
+	weight := 56
+	if weight < 50 {
+		fmt.Println("Too light.")
+	} else {
+		if weight < 70 {
+			fmt.Println("Decent weight")
+		} else {
+			fmt.Println("Too heavy")
+		}
 	}
 
 	// Simple if on a boolean value
