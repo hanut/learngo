@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Forms via GET request</title>
+    <style>
+      html,
+      body {
+        padding: 0;
+        margin: 0;
+        font-family: "Courier New", Courier, monospace;
+      }
+      body * {
+        margin: inherit;
+        padding: inherit;
+        font-family: inherit;
+      }
+      main {
+        width: 960px;
+        margin: 0 auto;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: start;
+        align-items: stretch;
+      }
+      .row,
+      .col {
+        flex:1;
+        margin: 0.25rem 0;
+        padding: 0.25rem .5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .row {
+        flex-direction: row;
+      }
+      .col {
+        flex-direction: column;
+      }
+      hr {
+        width: 100%;
+        height: 1px;
+        padding: 0;
+      }
+      input {
+        margin-block: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Form Tester</h1>
+      <hr />
+      <p><strong>Request Details</strong></p>
+      <hr />
+      <div class="row">
+        <h3>METHOD</h3>
+        <p>{{.RequestDetails.Method}}</p>
+      </div>
+      <div class="row">
+        <h3>PATH</h3>
+        <p>{{.RequestDetails.Path}}</p>
+      </div>
+      <div class="row">
+        <h3>HOST</h3>
+        <p>{{.RequestDetails.Host}}</p>
+      </div>
+      <div class="row">
+        <h3>CONTENT LENGTH</h3>
+        <p>{{.RequestDetails.ContentLength}}</p>
+      </div>
+      <hr />
+      <p><strong>Request Headers</strong></p>
+      <hr />
+      {{range $key,$value := .RequestDetails.Header}}
+      <div class="row">
+        <h3>{{$key}}</h3>
+        <div style="overflow: hidden;overflow-wrap: break-word;">{{range $value}}{{.}}{{end}}</div>
+      </div>
+      {{end}}
+      <hr />
+      {{if .Submissions}}
+      <p><strong>Identifiers</strong> & <em>values</em></p>
+      <hr />
+      {{range $key,$value := .Submissions}}
+      <div class="row">
+        <p>
+          <strong>{{ $key }}</strong>
+        </p>
+        {{range $value}} <em> {{ . }} </em> {{ end }}
+      </div>
+      {{ end }}
+      {{ end }}
+      <hr/>
+      <form action="/" method="post">
+        <div class="col">
+          <input type="text" name="fname" placeholder="Full Name" />
+          <input type="password" name="pass" placeholder="Password" />
+          <button type="submit">Submit</button>
+        </div>
+      </form>
+    </main>
+  </body>
+</html>
