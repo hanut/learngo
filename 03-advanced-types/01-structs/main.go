@@ -2,73 +2,51 @@ package main
 
 import "fmt"
 
-type Person struct {
-	Name   string
-	Age    uint8
-	Salary float32
-	Pets   []Pet
-}
-
-type Pet struct {
-	Name  string
-	Age   uint8
-	Cute  bool
-	Bites bool
-	Happy bool
-}
+const separator = "---------------------------------------"
 
 func main() {
+	// Structs are used to group logically related data
+	// together
 	fmt.Println("OOPS is POOPS. Structs FTW")
 
-	p1 := Person{
-		Name:   "Mr. Anderson",
-		Age:    35,
-		Salary: 100000,
+	// This struct holds status flags for a single conveyor belt
+	type StatusFlags struct {
+		isReady      bool
+		isMoving     bool
+		isJammed     bool
+		isOverloaded bool
 	}
 
-	fmt.Println("Here is p1", p1)
+	sf := StatusFlags{}
 
-	pet1 := Pet{
-		Name:  "Fluffy",
-		Age:   5,
-		Cute:  true,
-		Bites: true,
-		Happy: false,
+	fmt.Println("Single statusflag variable:", sf)
+
+	// Imagine a bunch of conveyor belts and their statuses
+	manysf := [3]StatusFlags{} // We have 3 conveyor belts now
+	fmt.Println("Flags of all conveyors:", manysf)
+
+	for idx, s := range manysf {
+		fmt.Printf("Flags for Conveyor %d : %v\n", idx+1, s)
 	}
 
-	p1.Pets = append(p1.Pets, pet1)
-	fmt.Println("pets after adoption:", p1.Pets)
-
-	var p2 Person
-	p2.Age = 38
-	p2.Name = "Agent Smith"
-	p2.Salary = 0
-	fmt.Println("Here is p2", p2)
-
-	p2.Age++
-
-	fmt.Println(p2.Name+"'s age after 1 year=", p2.Age)
-
-	p3 := Person{
-		Name:   "Trinity",
-		Age:    33,
-		Salary: 0,
-		Pets: []Pet{
-			{
-				Name:  "Charlie",
-				Age:   12,
-				Cute:  false,
-				Bites: true,
-				Happy: true,
-			},
-			{
-				Name:  "Tiger",
-				Age:   6,
-				Cute:  true,
-				Bites: false,
-				Happy: true,
-			},
-		},
+	// Setting up the values of a struct
+	sf2 := StatusFlags{
+		isReady:      true,
+		isMoving:     true,
+		isJammed:     false,
+		isOverloaded: false,
 	}
-	fmt.Println("Person 3:", p3)
+	fmt.Printf("%s\nStatus of conveyor 2\n%s\n%v\n", separator, separator, sf2)
+
+	// Access the properties of our struct to print a more readable message
+	fmt.Printf("%s\nStatus of the conveyor 2\n%s\nReady:\t%t\nMoving:\t%t\nJammed:\t%t\nOverloaded:\t%t\n", separator, separator, sf2.isReady, sf2.isMoving, sf2.isJammed, sf2.isOverloaded)
+
+	// We will now change the status to reflect that conveyor 2 is jammed
+	sf2.isJammed = true
+	fmt.Printf("%s\nStatus of the conveyor 2\n%s\nReady:\t%t\nMoving:\t%t\nJammed:\t%t\nOverloaded:\t%t\n", separator, separator, sf2.isReady, sf2.isMoving, sf2.isJammed, sf2.isOverloaded)
+
+	// Lets update the value of isReady conveyor three in our array of conveyors
+	manysf[2].isReady = true
+	fmt.Printf("%s\nStatus of the conveyor 3\n%s\nReady:\t%t\nMoving:\t%t\nJammed:\t%t\nOverloaded:\t%t\n", separator, separator, manysf[2].isReady, manysf[2].isMoving, manysf[2].isJammed, manysf[2].isOverloaded)
+
 }
