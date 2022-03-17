@@ -6,7 +6,12 @@ func main() {
 	fmt.Println("Higher order Functions in Golang")
 
 	// Simple HoF that builds greeting functions
-	
+	greetEnglish := GreetBuilder("Hello")
+	greetHindi := GreetBuilder("Namaste")
+	greetDeutsche := GreetBuilder("Guten Tag")
+	greetEnglish("Alice")
+	greetHindi("Alice")
+	greetDeutsche("Alice")
 
 	// Simple HoF that builds dynamic incrementor functions
 	Inc3 := IncrementBuilder(3)
