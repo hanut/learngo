@@ -1,140 +1,203 @@
 package main
 
 import (
-	"errors"
+	"fmt"
+	"hanut/learngo/gin/crudapp/database"
+	"hanut/learngo/gin/crudapp/libs/auth"
+	"hanut/learngo/gin/crudapp/middleware"
+	"hanut/learngo/gin/crudapp/routes"
+	"log"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+type CreateUserForm struct {
+	Email    string    `json:"email" binding:"required,email"`
+	Password string    `json:"password" binding:"required"`
+	Fname    string    `json:"fname" binding:"required,alpha"`
+	Lname    string    `json:"lname" binding:"required,alpha"`
+	Dob      time.Time `json:"dob" binding:"required,datetime"`
+}
+
+type UpdateUserForm struct {
+	Email    string    `json:"email,omitempty" binding:"email"`
+	Password string    `json:"password,omitempty"`
+	Fname    string    `json:"fname,omitempty" binding:"alpha"`
+	Lname    string    `json:"lname,omitempty" binding:"alpha"`
+	Dob      time.Time `json:"dob,omitempty"`
+}
+
+func (uff *UpdateUserForm) String() string {
+	return fmt.Sprintf(`
+		Email: %s
+		Password: %s
+		Fname: %s,
+		Lname: %s,
+		DoB: %v
+	`, uff.Email, uff.Password, uff.Fname, uff.Lname, uff.Dob)
+}
+
 type User struct {
-	Id     string
-	Email  string
-	Secret string
-	Fname  string
-	Lname  string
-	Dob    time.Time
-	Status bool
-}
-
-type UserList []User
-
-// FindUserById looks for a user with the given id in the user list
-// and returns it if found. If not, the f return value will be false
-func (ul *UserList) FindUserById(uid string) (fu *User, f bool) {
-	for _, u := range *ul {
-		if u.Id == uid {
-			f = true
-			fu = &u
-		}
-	}
-	return
-}
-
-func (ul *UserList) FindAndDeleteById(uid string) (err error) {
-	fi := -1
-
-	for i, u := range *ul {
-		if u.Id == uid {
-			fi = i
-		}
-	}
-
-	if fi == -1 {
-		err = errors.New("User not found")
-		return
-	}
-
-	// Remove the user from the slice
-	var tmp []User = append([]User{}, []User(*ul)[:fi]...) // Convert to slice so we can do stuff
-	tmp = append(tmp, []User(*ul)[fi+1:]...)
-
-	*ul = UserList(tmp) // Conver back to user list and assign to the original list
-	return
+	Id     primitive.ObjectID `json:"id" bson:"_id,omitempty"`
+	Email  string             `json:"email" bson:"email,omitempty"`
+	Secret string             `json:"-" bson:"secret,omitempty"`
+	Fname  string             `json:"fname" bson:"fname,omitempty"`
+	Lname  string             `json:"lname" bson:"lname,omitempty"`
+	Dob    primitive.DateTime `json:"dob" bson:"dob,omitempty"`
+	Status bool               `json:"status" bson:"status,omitempty"`
 }
 
 func main() {
 	// Setup the database
-	// database.Init()
-	// defer database.Close()
+	err := database.InitMongo()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	// Defer the close of db connection to after main ends
+	defer database.CloseMongo()
 
+	// Create a new Gin engine
 	r := gin.New()
 
+	// Setup middleware
 	r.Use(gin.Logger())
+	r.Use(middleware.RequestIdMiddleware())
+	r.Use(middleware.Logger())
 	r.Use(gin.Recovery())
 
-	var ul UserList
+	r.GET("/manage/account", routes.ManageAccount)
+	r.GET("/manage/profile", routes.ManageMyProfile)
+
+	// Endpoint for creating a new user
+	r.POST("/users", func(ctx *gin.Context) {
+		var uf CreateUserForm
+		if err := ctx.ShouldBindJSON(&uf); err != nil {
+			handleError(ctx, http.StatusBadRequest, err)
+			return
+		}
+		s := auth.GenerateSecret(uf.Password)
+		u := User{
+			Email:  uf.Email,
+			Secret: s,
+			Fname:  uf.Fname,
+			Lname:  uf.Lname,
+			Dob:    primitive.NewDateTimeFromTime(uf.Dob),
+			Status: false,
+		}
+
+		// Insert into the database
+		r, e := database.ColUser.InsertOne(ctx.Request.Context(), u)
+		if e != nil {
+			handleError(ctx, 500, errors.Wrap(e, "Error adding new user"))
+			return
+		}
+		// Retrieve the new user from the database and decode it into the user
+		// Handle any errors if they occur
+		e = database.ColUser.FindOne(ctx.Request.Context(), bson.M{"_id": r.InsertedID}).Decode(&u)
+		if e != nil {
+			handleError(ctx, 500, errors.Wrap(e, "Error finding newly added user"))
+			return
+		}
+		ctx.JSON(201, u)
+	})
 
 	// Endpoint for getting a list of all the users
 	r.GET("/users", func(ctx *gin.Context) {
-		ctx.JSON(200, ul)
+		cs, e := database.ColUser.Find(ctx.Request.Context(), bson.M{})
+		if e != nil {
+			handleError(ctx, http.StatusInternalServerError, errors.Wrap(e, "Error creating cursor for user list"))
+			return
+		}
+		var results []User
+		e = cs.All(ctx.Request.Context(), &results)
+		if e != nil {
+			handleError(ctx, http.StatusInternalServerError, errors.Wrap(e, "Error getting all records from user list cursor"))
+			return
+		}
+		ctx.JSON(200, results)
 	})
 
-	// Endpoint for getting a specific user by id
+	// // Endpoint for getting a specific user by id
 	r.GET("/users/:userid", func(ctx *gin.Context) {
-		uid := ctx.Param("userid")
-		println(uid, len(uid))
-		if len(uid) != 24 {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user id"})
+		// uihx is the user id as a hexadecimal string
+		// as sent by the client
+		uihx := ctx.Param("userid")
+
+		// objid is the uihx converted to a valid mongo
+		// objectid
+		objid, e := primitive.ObjectIDFromHex(uihx)
+		if e != nil {
+			handleError(ctx, http.StatusBadRequest, errors.Wrap(e, "Invalid object id"))
+			return
+		}
+		var fu User
+		e = database.ColUser.FindOne(ctx.Request.Context(), bson.M{"_id": objid}).Decode(&fu)
+		if e != nil {
+			handleError(ctx, http.StatusNotFound, errors.Wrap(e, "No user found with that id"))
 			return
 		}
 
-		fu, f := ul.FindUserById(uid)
-		if !f {
-			ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-			return
-		}
-
-		ctx.JSON(200, *fu)
+		ctx.JSON(200, fu)
 	})
 
-	// Endpoint for getting a specific user by id
-	r.POST("/users", func(ctx *gin.Context) {
-		var u User
-		if err := ctx.ShouldBindJSON(&u); err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	r.PATCH("/users/:userid", func(ctx *gin.Context) {
+		// uihx is the user id as a hexadecimal string
+		// as sent by the client
+		uihx := ctx.Param("userid")
+
+		// objid is the uihx converted to a valid mongo
+		// objectid
+		objid, e := primitive.ObjectIDFromHex(uihx)
+		if e != nil {
+			handleError(ctx, http.StatusBadRequest, errors.Wrap(e, "Invalid object id"))
 			return
 		}
-		ul = append(ul, u)
-		ctx.JSON(201, true)
-	})
-
-	r.PUT("/users", func(ctx *gin.Context) {
-		var u User
-		if err := ctx.ShouldBindJSON(&u); err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		var uf UpdateUserForm
+		if err := ctx.BindJSON(&uf); err != nil {
+			handleError(ctx, 400, err)
 			return
 		}
-		fu, f := ul.FindUserById(u.Id)
-		if !f {
-			ctx.JSON(http.StatusNotFound, gin.H{"error": "User not Found"})
-			return
-		}
+		log.Println(uf.String())
+		uu := bson.M{}
+		database.ColUser.FindOneAndUpdate(ctx.Request.Context(), bson.M{"_id": objid}, uu)
+		// if !f {
+		// 	ctx.JSON(http.StatusNotFound, gin.H{"error": "User not Found"})
+		// 	return
+		// }
 
-		// Update the user by replacing value of the pointer with new user
-		// received from client
-		*fu = u
-
-		ctx.JSON(200, *fu)
-	})
-
-	r.DELETE("/users/:userId", func(ctx *gin.Context) {
-		uid := ctx.Param("userId")
-
-		if len(uid) != 24 {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user id"})
-			return
-		}
-
-		err := ul.FindAndDeleteById(uid)
-		if err != nil {
-			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-			return
-		}
+		// // Update the user by replacing value of the pointer with new user
+		// // received from client
+		// *fu = u
 
 		ctx.JSON(200, true)
 	})
 
+	// r.DELETE("/users/:userid", func(ctx *gin.Context) {
+	// 	uid := ctx.Param("userid")
+
+	// 	if len(uid) != 24 {
+	// 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user id"})
+	// 		return
+	// 	}
+
+	// 	err := ul.FindAndDeleteById(uid)
+	// 	if err != nil {
+	// 		ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+	// 		return
+	// 	}
+
+	// 	ctx.JSON(200, true)
+	// })
+
 	r.Run("localhost:3000")
+}
+
+func handleError(ctx *gin.Context, ecode int, e error) {
+	ctx.JSON(ecode, gin.H{"error": e.Error()})
+	log.Printf("[ERROR] (%d) %s \n", ecode, e.Error())
 }
