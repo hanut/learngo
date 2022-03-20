@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"hanut/learngo/gin/crudapp/database"
 	"hanut/learngo/gin/crudapp/libs/auth"
 	"hanut/learngo/gin/crudapp/middleware"
@@ -10,10 +9,12 @@ import (
 	"net/http"
 	"time"
 
+	helmet "github.com/danielkov/gin-helmet"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type CreateUserForm struct {
@@ -21,25 +22,13 @@ type CreateUserForm struct {
 	Password string    `json:"password" binding:"required"`
 	Fname    string    `json:"fname" binding:"required,alpha"`
 	Lname    string    `json:"lname" binding:"required,alpha"`
-	Dob      time.Time `json:"dob" binding:"required,datetime"`
+	Dob      time.Time `json:"dob" binding:"required"`
 }
 
 type UpdateUserForm struct {
-	Email    string    `json:"email,omitempty" binding:"email"`
-	Password string    `json:"password,omitempty"`
-	Fname    string    `json:"fname,omitempty" binding:"alpha"`
-	Lname    string    `json:"lname,omitempty" binding:"alpha"`
-	Dob      time.Time `json:"dob,omitempty"`
-}
-
-func (uff *UpdateUserForm) String() string {
-	return fmt.Sprintf(`
-		Email: %s
-		Password: %s
-		Fname: %s,
-		Lname: %s,
-		DoB: %v
-	`, uff.Email, uff.Password, uff.Fname, uff.Lname, uff.Dob)
+	Fname string    `json:"fname" binding:"required,alpha"`
+	Lname string    `json:"lname" binding:"required,alpha"`
+	Dob   time.Time `json:"dob" binding:"required"`
 }
 
 type User struct {
@@ -66,10 +55,16 @@ func main() {
 
 	// Setup middleware
 	r.Use(gin.Logger())
+
+	// Custom example middleware
 	r.Use(middleware.RequestIdMiddleware())
 	r.Use(middleware.Logger())
+
+	// Security Headers middleware
+	r.Use(helmet.Default())
 	r.Use(gin.Recovery())
 
+	// Authenticated routes protected by a simple router middleware
 	r.GET("/manage/account", routes.ManageAccount)
 	r.GET("/manage/profile", routes.ManageMyProfile)
 
@@ -145,7 +140,7 @@ func main() {
 		ctx.JSON(200, fu)
 	})
 
-	r.PATCH("/users/:userid", func(ctx *gin.Context) {
+	r.PUT("/users/:userid", func(ctx *gin.Context) {
 		// uihx is the user id as a hexadecimal string
 		// as sent by the client
 		uihx := ctx.Param("userid")
@@ -162,37 +157,41 @@ func main() {
 			handleError(ctx, 400, err)
 			return
 		}
-		log.Println(uf.String())
-		uu := bson.M{}
-		database.ColUser.FindOneAndUpdate(ctx.Request.Context(), bson.M{"_id": objid}, uu)
-		// if !f {
-		// 	ctx.JSON(http.StatusNotFound, gin.H{"error": "User not Found"})
-		// 	return
-		// }
+		var o options.FindOneAndUpdateOptions
+		o.SetReturnDocument(options.After)
 
-		// // Update the user by replacing value of the pointer with new user
-		// // received from client
-		// *fu = u
+		r := database.ColUser.FindOneAndUpdate(ctx.Request.Context(), bson.M{"_id": objid}, bson.M{
+			"$set": bson.M{
+				"fname": uf.Fname,
+				"lname": uf.Lname,
+				"dob":   uf.Dob,
+			},
+		}, &o)
+		if r.Err() != nil {
+			handleError(ctx, 403, r.Err())
+			return
+		}
+		var user User
+		r.Decode(&user)
+		ctx.JSON(200, user)
+	})
+
+	r.DELETE("/users/:userid", func(ctx *gin.Context) {
+		uid := ctx.Param("userid")
+
+		if len(uid) != 24 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user id"})
+			return
+		}
+
+		err := ul.FindAndDeleteById(uid)
+		if err != nil {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
 
 		ctx.JSON(200, true)
 	})
-
-	// r.DELETE("/users/:userid", func(ctx *gin.Context) {
-	// 	uid := ctx.Param("userid")
-
-	// 	if len(uid) != 24 {
-	// 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user id"})
-	// 		return
-	// 	}
-
-	// 	err := ul.FindAndDeleteById(uid)
-	// 	if err != nil {
-	// 		ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-	// 		return
-	// 	}
-
-	// 	ctx.JSON(200, true)
-	// })
 
 	r.Run("localhost:3000")
 }
