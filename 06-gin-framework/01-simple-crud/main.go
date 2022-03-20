@@ -54,9 +54,6 @@ func main() {
 	// Defer the close of db connection to after main ends
 	defer database.CloseMongo()
 
-	// Set mode to release for prod
-	gin.SetMode(gin.ReleaseMode)
-
 	// Create a new Gin engine
 	r := gin.New()
 
