@@ -18,3 +18,8 @@ The application makes use of the following external packages -
 
 1. Gin Framework - This is used as our REST api framework for routing, middleware etc
 2. mgo - Used as the driver for interacting with the MongoDB database
+
+## Environment Variables
+
+1. **CA_MONGO_URI** - Configures the mongodb uri string
+2. **CA_PORT** - Overrides the default application listening port

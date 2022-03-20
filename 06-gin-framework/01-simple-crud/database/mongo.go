@@ -24,7 +24,7 @@ var (
 
 // Connect connects to mongodb
 func InitMongo() error {
-	uri := os.Getenv("MONGO_URI")
+	uri := os.Getenv("CA_MONGO_URI")
 
 	if len(uri) == 0 {
 		uri = DefaultMongoUri

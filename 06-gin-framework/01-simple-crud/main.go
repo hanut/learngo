@@ -1,12 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"hanut/learngo/gin/crudapp/database"
 	"hanut/learngo/gin/crudapp/libs/auth"
 	"hanut/learngo/gin/crudapp/middleware"
 	"hanut/learngo/gin/crudapp/routes"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 	"time"
 
 	helmet "github.com/danielkov/gin-helmet"
@@ -235,7 +238,11 @@ func main() {
 		ctx.JSON(200, user)
 	})
 
-	r.Run(":3000")
+	p, e := strconv.ParseInt(os.Getenv("CA_PORT"), 10, 16)
+	if e == nil {
+		p = 3000
+	}
+	r.Run(fmt.Sprintf(":%d", p))
 }
 
 func handleError(ctx *gin.Context, ecode int, e error) {
