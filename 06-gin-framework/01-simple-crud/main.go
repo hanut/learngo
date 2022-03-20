@@ -14,6 +14,7 @@ import (
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -49,6 +50,9 @@ func main() {
 	}
 	// Defer the close of db connection to after main ends
 	defer database.CloseMongo()
+
+	// Set mode to release for prod
+	gin.SetMode(gin.ReleaseMode)
 
 	// Create a new Gin engine
 	r := gin.New()
@@ -176,24 +180,62 @@ func main() {
 		ctx.JSON(200, user)
 	})
 
-	r.DELETE("/users/:userid", func(ctx *gin.Context) {
-		uid := ctx.Param("userid")
+	r.PATCH("/users/:userid/status", func(ctx *gin.Context) {
+		// uihx is the user id as a hexadecimal string
+		// as sent by the client
+		uihx := ctx.Param("userid")
 
-		if len(uid) != 24 {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user id"})
+		// objid is the uihx converted to a valid mongo
+		// objectid
+		objid, e := primitive.ObjectIDFromHex(uihx)
+		if e != nil {
+			handleError(ctx, http.StatusBadRequest, errors.Wrap(e, "Invalid object id"))
 			return
 		}
+		var o options.FindOneAndUpdateOptions
+		o.SetReturnDocument(options.After)
 
-		err := ul.FindAndDeleteById(uid)
-		if err != nil {
-			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		r := database.ColUser.FindOneAndUpdate(ctx.Request.Context(), bson.M{"_id": objid}, []bson.M{
+			{
+				"$set": bson.M{
+					"status": bson.M{"$not": "$status"},
+				},
+			},
+		}, &o)
+		if r.Err() != nil {
+			handleError(ctx, 403, r.Err())
 			return
 		}
-
-		ctx.JSON(200, true)
+		var user User
+		r.Decode(&user)
+		ctx.JSON(200, user)
 	})
 
-	r.Run("localhost:3000")
+	r.DELETE("/users/:userid", func(ctx *gin.Context) {
+		uid := ctx.Param("userid")
+		objid, e := primitive.ObjectIDFromHex(uid)
+
+		if e != nil {
+			handleError(ctx, http.StatusBadRequest, errors.Wrap(e, "Invalid object id"))
+			return
+		}
+
+		r := database.ColUser.FindOneAndDelete(ctx.Request.Context(), bson.M{"_id": objid})
+		e = r.Err()
+		if e != nil {
+			if errors.Is(e, mongo.ErrNoDocuments) {
+				handleError(ctx, 404, errors.New("User not found"))
+				return
+			}
+			handleError(ctx, 500, r.Err())
+			return
+		}
+		var user User
+		r.Decode(&user)
+		ctx.JSON(200, user)
+	})
+
+	r.Run(":3000")
 }
 
 func handleError(ctx *gin.Context, ecode int, e error) {
