@@ -234,9 +234,12 @@ func main() {
 		r.Decode(&user)
 		ctx.JSON(200, user)
 	})
-
-	p, e := strconv.ParseInt(os.Getenv("CA_PORT"), 10, 16)
-	if e == nil {
+	ps := os.Getenv("CA_PORT")
+	fmt.Println("Port from env", ps)
+	p, e := strconv.ParseInt(ps, 10, 16)
+	// Set default port as 3000 incase the value is not
+	// set in the environment or is not a valid port for us
+	if e != nil || p < 2999 {
 		p = 3000
 	}
 	r.Run(fmt.Sprintf(":%d", p))
