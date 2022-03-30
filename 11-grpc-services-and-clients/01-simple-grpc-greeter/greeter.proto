@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option go_package = "hanut/learngo/grpc/simpleservice";
+package simpleservice;
+
+service Greeter {
+  rpc Greet (GreetReq) returns (GreetRes) {}
+}
+
+message GreetReq {
+  string fame = 1;
+  string lame = 2;
+}
+
+message GreetRes {
+  string greeting = 1;
+}
