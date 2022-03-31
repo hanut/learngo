@@ -14,5 +14,6 @@ and other network programming
 7. Interfaces and generics in Golang
 8. Concurrency in Golang including the go keyword, the sync package, atom package and channels
 9. Introduction to using the Fiber framework for REST apis
-~~x. testing in golang~~
-~~x.benchmarking and profiling in golang~~
+10. Writing unit tests
+11. Benchmarking and profiling applications
+12. Interesting problems and their solutions
