@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sessions</title>
+  </head>
+  <body>
+    <h1>Sessions in Golang</h1>
+    <hr />
+    <div>
+      {{ if .Session }}
+      <a href="/session/end">End a session</a>
+      {{ else }}
+      <a href="/session/start">Start a session</a>
+      {{ end }}
+    </div>
+    {{ if .Session }}
+    <div>
+      <h4>Session Data</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>Key</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Session Id</td>
+            <td>{{ .Session.Sid }}</td>
+          </tr>
+          <tr>
+            <td>Session Started At</td>
+            <td>{{ .Session.StartedAt }}</td>
+          </tr>
+          <tr>
+            <td>Session User</td>
+            <td>{{ .Session.User }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    {{ end }}
+  </body>
+</html>
