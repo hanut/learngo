@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cookies</title>
+</head>
+<body>
+  <h1>Working with Cookies</h1>
+  {{ if .Cookie }}<p>Cookie is set</p>{{ else }}<p>Cookie not set</p>{{ end }}
+  <div>
+    <form action="/set-cookie" method="post">
+      <select name="userId">
+        {{ range .Users }}
+        <option value="{{.Id}}">{{.Name}}</option>
+        {{ end }}
+      </select>
+      <button type="submit">Set Cookie</button>
+    </form>
+  </div>
+  <hr/>
+  <div>
+    <a href="/results">View Cookie</a>
+    |
+    <a href="/specific">View Specific Cookie</a>
+    |
+    <a href="/clear-cookie">Clear Cookie</a>
+  </div>
+  <hr/>
+  {{ if ne  .Error "" }}
+  <hr/>
+  <div>
+    <h3 style="text-color:red;">Error</h3>
+    <p style="text-color:red;">{{ .Error }}</p>
+  </div>
+  {{ end }}
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>View Cookie</title>
+  </head>
+  <body>
+    <h1>View Cookie</h1>
+    <p>Given below are the contents of the current cookie</p>
+    <div>
+      <h3>Server Side</h3>
+      <p>{{.}}</p>
+    </div>
+    <div>
+      <h3>Client Side</h3>
+      <p id="csck"></p>
+    </div>
+    <hr />
+    <div>
+      <a href="/">Back</a>
+    </div>
+    <script>
+      // Just set the cookie in the appropriate element
+      // when the page has loaded
+      window.onload = () => {
+        const cs = atob(document.cookie.split("=")[1]);
+        const [id, name] = cs.split("|");
+        document.querySelector(
+          "#csck"
+        ).innerHTML = `<p>Cookie: "<strong>${document.cookie}</strong>"</p><p>Name: ${name}</p><p>Id: ${id}</p>`;
+      };
+    </script>
+  </body>
+</html>

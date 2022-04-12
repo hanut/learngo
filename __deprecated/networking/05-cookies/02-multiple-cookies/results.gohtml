@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>View Cookie</title>
+    <style type="text/css">
+      #cookieTable {
+        border: 1px solid black;
+        border-collapse:collapse;
+      }
+      #cookieTable tr th, #cookieTable tr td{
+        border: 1px solid black;
+        padding: 0.5rem;
+        font-family: sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>View Cookie</h1>
+    <p>Given below are the contents of the current cookie</p>
+    <div>
+      <h3>Server Side</h3>
+      <p>Number of Cookies: {{ .CookieCount }}</p>
+      <p>Cookie: {{ .Cookie }}</p>
+    </div>
+    <div>
+      <h3>Client Side</h3>
+      <p id="csck"></p>
+    </div>
+    <hr />
+    <div>
+      <a href="/">Back</a>
+    </div>
+    <script>
+      // Just set the cookie in the appropriate element
+      // when the page has loaded
+      window.onload = () => {
+        let cstring = `<table id="cookieTable"><thead><tr><th>Cookie Name</th><th>Value</th></tr></thead><tbody>`;
+        document.cookie.split(";").forEach(cookie => {
+          const [name, value] = cookie.split("=");
+          cstring += `<tr><td>${name}</td><td>${value}</td></tr>`;
+        })
+        cstring +="</tbody></table>";
+        document.querySelector(
+          "#csck"
+        ).innerHTML = cstring;
+      };
+    </script>
+  </body>
+</html>
