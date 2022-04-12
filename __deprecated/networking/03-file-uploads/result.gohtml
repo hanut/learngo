@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Reading an uploaded file in Go</title>
+    <style>
+      html,
+      body {
+        padding: 0;
+        margin: 0;
+        font-family: "Courier New", Courier, monospace;
+      }
+      body * {
+        margin: inherit;
+        padding: inherit;
+        font-family: inherit;
+      }
+      main {
+        width: 960px;
+        margin: 0 auto;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: start;
+        align-items: center;
+      }
+      .row,
+      .col {
+        display: flex;
+        justify-content: start;
+        align-items: center;
+      }
+      .row {
+        flex-direction: row;
+      }
+      .col {
+        flex-direction: column;
+      }
+      .col:child,.row:child{
+        flex: 1;
+      }
+      hr {
+        width: 100%;
+        height: 1px;
+        padding: 0;
+      }
+      input {
+        margin-block: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>File upload results</h1>
+      <hr />
+      {{if .}}
+        <div class="row">
+          <strong>File Name</strong>
+          <em>{{ index . "filename" }}</em>
+        </div>
+        <div class="row">
+          <strong>File Type</strong>
+          <em>{{ index . "filetype" }}</em>
+        </div>
+        <div class="row">
+          <strong>Content</strong>
+          <em>{{ index . "content" }}</em>
+        </div>
+      {{ end }}
+    </main>
+  </body>
+</html>
