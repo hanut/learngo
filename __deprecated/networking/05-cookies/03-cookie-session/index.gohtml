@@ -5,21 +5,54 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sessions</title>
+    <style>
+      :root{
+        --primary-dark: #0b0b0b;
+      }
+      body {
+        padding: 1rem;
+        font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+      }
+      a.btn {
+        color: var(--primary-dark);
+        text-decoration: none;
+        padding: 0.25rem 0.5rem;
+        border: 1px solid var(--primary-dark);
+        transition:cubic-bezier(0.55, 0.055, 0.675, 0.19) all 300ms;
+      }
+      a.btn:hover {
+        color: white;
+        background: var(--primary-dark);
+      }
+      #dt {
+        border: 1px solid grey;
+        border-collapse: collapse;
+      } 
+      #dt th, #dt td {
+        border: 1px solid grey;
+        padding: 0.5rem;
+      }
+      #dt th {
+        font-weight: bold;
+        background-color: var(--primary-dark);
+        color: white;
+      }
+    </style>
   </head>
   <body>
     <h1>Sessions in Golang</h1>
     <hr />
     <div>
       {{ if .Session }}
-      <a href="/session/end">End a session</a>
+      <a class="btn" href="/session/end">End a session</a>
       {{ else }}
-      <a href="/session/start">Start a session</a>
+      <a class="btn" href="/session/start">Start a session</a>
       {{ end }}
     </div>
     {{ if .Session }}
     <div>
       <h4>Session Data</h4>
-      <table>
+      <table id="dt">
         <thead>
           <tr>
             <th>Key</th>
@@ -29,15 +62,15 @@
         <tbody>
           <tr>
             <td>Session Id</td>
-            <td>{{ .Session.Sid }}</td>
-          </tr>
-          <tr>
-            <td>Session Started At</td>
-            <td>{{ .Session.StartedAt }}</td>
+            <td>{{ .Session.Id }}</td>
           </tr>
           <tr>
             <td>Session User</td>
             <td>{{ .Session.User }}</td>
+          </tr>
+          <tr>
+            <td>Session Started At</td>
+            <td>{{ .Session.StartedAt }}</td>
           </tr>
         </tbody>
       </table>
