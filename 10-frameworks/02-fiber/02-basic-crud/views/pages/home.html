@@ -1,0 +1,41 @@
+<h1 style="text-align: center; margin-top: 1rem">Login Required</h1>
+<div>
+  <form class="loginForm">
+    <input type="text" id="userId" name="userid" placeholder="Userid...." />
+    <input
+      type="password"
+      id="password"
+      name="password"
+      placeholder="Password..."
+    />
+    <button type="button" onclick="login()">Login</button>
+  </form>
+  <script>
+    function login() {
+      const uid = document.querySelector("#userId").value;
+      const pass = document.querySelector("#password").value;
+      if (uid.length === 0 || uid.trim() === "") {
+        return alert("User id is required and cannot be blank");
+      }
+      if (
+        pass.length < 8 ||
+        pass.length > 16 ||
+        pass.trim() === ""
+      ) {
+        return alert(
+          "Password is required and must be between 8 and 16 characters"
+        );
+      }
+      fetch("/auth/form", {
+        method: "post",
+        body: JSON.stringify({ uid, pass }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+        .then((r) => r.json())
+        .then((r) => console.log(r))
+        .catch(console.warn);
+    }
+  </script>
+</div>
