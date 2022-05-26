@@ -1,5 +1,23 @@
-{{template "partials/header" .}}
-
-<h1>{{.Title}}</h1>
-
-{{template "partials/footer" .}}
+<h1 style="margin-block: 1rem;">{{ .Page }}</h1>
+<table class="dataTable">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+  {{ range $uid, $user := .Users }}
+    <tr id="user-{{ $uid }}">
+      <td>{{ $uid }}</td>
+      <td>{{ $user.FirstName }} {{ $user.LastName }}</td>
+      <td>
+        <a href="/view/{{ $uid }}">View</a>
+        <a href="/edit/{{ $uid }}">Edit</a>
+        <a href="/remove/{{ $uid }}">Remove</a>
+      </td>
+    </tr>
+  {{ end }}
+  </tbody>
+</table>

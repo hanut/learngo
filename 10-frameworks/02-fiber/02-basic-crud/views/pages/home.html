@@ -33,7 +33,8 @@
         .then((r) => r.json())
         .then((r) => {
           console.log(r);
-          {{/* window.location.replace("/dashboard"); */}}
+          localStorage.setItem("authData", JSON.stringify(r));
+          window.location.replace("/webapp/dashboard");
         })
         .catch(console.warn);
     }

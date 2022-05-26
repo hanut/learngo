@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"fmt"
@@ -21,15 +21,13 @@ func InitSession(app *fiber.App) {
 	})
 
 	app.Use("/webapp/dashboard", validSessionMiddleware)
-	app.Use("/api/dashboard", validSessionMiddleware)
 }
 
 func validSessionMiddleware(c *fiber.Ctx) error {
 	sess, err := SessionStore.Get(c)
 	if err != nil {
-		fmt.Println("SESSION WARNING:", err.Error())
-	} else {
-		fmt.Println("New Session ? ", sess.Fresh())
+		return fiber.ErrUnauthorized
 	}
+	fmt.Println("Is this a new session ?", sess.Fresh())
 	return c.Next()
 }

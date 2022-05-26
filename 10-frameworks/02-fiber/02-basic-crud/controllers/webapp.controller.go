@@ -15,7 +15,9 @@ func WebappController(r fiber.Router) {
 	// Route handler for the main index page before login
 	r.Get("/dashboard", func(c *fiber.Ctx) error {
 		return c.Status(200).Render("pages/dashboard", fiber.Map{
-			"Title": "Admin Portal | Dashboard",
+			"Title": "UMS Dashboard",
+			"Page":  "List Users",
+			"Users": UserStore,
 		}, "layouts/dashboard")
 	})
 

@@ -7,6 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"hanutsingh.in/learngo/frameworks/fiber/02/database"
+	utils "hanutsingh.in/learngo/frameworks/fiber/02/utils"
 )
 
 type LoginForm struct {
@@ -51,6 +52,9 @@ func AuthenticationController(r fiber.Router) {
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
+		sess, err := utils.SessionStore.Get(c)
+		sess.Set("username", lf.UserId)
+		sess.SetExpiry(time.Second * 60)
 		return c.JSON(fiber.Map{"token": t, "expiry": expat})
 	})
 

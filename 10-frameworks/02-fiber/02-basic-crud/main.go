@@ -11,6 +11,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/template/html"
 	"hanutsingh.in/learngo/frameworks/fiber/02/controllers"
+	utils "hanutsingh.in/learngo/frameworks/fiber/02/utils"
 )
 
 const ConnTimeout = time.Second * 30
@@ -34,10 +35,10 @@ func main() {
 	app.Use(logger.New())
 
 	// Initialize the Session
-	InitSession(app)
+	utils.InitSession(app)
 
 	// Initialize the JWT Middleware
-	InitJwt(app)
+	utils.InitJwt(app)
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.Redirect("/webapp", 301)
