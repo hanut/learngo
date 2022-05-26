@@ -51,7 +51,6 @@ func AuthenticationController(r fiber.Router) {
 		if err != nil {
 			return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 		}
-
 		return c.JSON(fiber.Map{"token": t, "expiry": expat})
 	})
 

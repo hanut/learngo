@@ -7,7 +7,8 @@ func WebappController(r fiber.Router) {
 	// Route handler for the main index page before login
 	r.Get("/", func(c *fiber.Ctx) error {
 		return c.Status(200).Render("pages/home", fiber.Map{
-			"Title": "Admin Portal",
+			"Title":       "Admin Portal",
+			"AuthDataKey": "authData",
 		}, "layouts/public")
 	})
 

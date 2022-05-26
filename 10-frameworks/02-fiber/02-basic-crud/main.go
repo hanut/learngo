@@ -3,15 +3,17 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
 	"github.com/gofiber/fiber/v2/middleware/logger"
-	jwtMiddleware "github.com/gofiber/jwt/v3"
 	"github.com/gofiber/template/html"
 	"hanutsingh.in/learngo/frameworks/fiber/02/controllers"
 )
+
+const ConnTimeout = time.Second * 30
 
 var validate = validator.New()
 
@@ -20,25 +22,22 @@ func main() {
 	tplEngine := html.New("./views", ".html")
 
 	app := fiber.New(fiber.Config{
-		Views: tplEngine,
+		Views:             tplEngine,
+		AppName:           "Simple User Service",
+		Concurrency:       100, // Limits this service to a maximum of 100 concurrent connections
+		ReadTimeout:       ConnTimeout,
+		WriteTimeout:      ConnTimeout,
+		IdleTimeout:       ConnTimeout,
+		StreamRequestBody: true,
 	})
 
 	app.Use(logger.New())
 
-	app.Use(func(c *fiber.Ctx) error {
-		sess, err := SessionStore.Get(c)
-		if err != nil {
-			fmt.Println("SESSION WARNING:", err.Error())
-		} else {
-			fmt.Println("New Session ? ", sess.Fresh())
-		}
-		return c.Next()
-	})
+	// Initialize the Session
+	InitSession(app)
 
-	// JWT Middleware
-	app.Use("/users", jwtMiddleware.New(jwtMiddleware.Config{
-		SigningKey: []byte("replace this with an actual key"),
-	}))
+	// Initialize the JWT Middleware
+	InitJwt(app)
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.Redirect("/webapp", 301)
