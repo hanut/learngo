@@ -36,7 +36,7 @@ func AuthenticationController(r fiber.Router) {
 			return fiber.NewError(401, "Invalid username or password")
 		}
 
-		expat := time.Now().Add(time.Hour * 72).Unix()
+		expat := time.Now().Add(time.Minute * 10).Unix()
 		// Create the Claims
 		claims := jwt.MapClaims{
 			"name": fmt.Sprintf("%s %s", u.FirstName, u.LastName),
@@ -54,6 +54,8 @@ func AuthenticationController(r fiber.Router) {
 		}
 		sess, err := utils.SessionStore.Get(c)
 		sess.Set("username", lf.UserId)
+		// Set specific expiry to 10 minutes for session
+		// overiding the configured value in the session config
 		sess.SetExpiry(time.Minute * 10)
 		err = sess.Save()
 		if err != nil {

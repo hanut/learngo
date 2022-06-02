@@ -6,7 +6,13 @@
   {{ end }} 
   {{ if .Page }}
   <div class="actions">
-    <a href="/webapp/logout">Logout</a>
+    <a onclick="logout();">Logout</a>
   </div>
+  <script>
+    function logout() {
+      localStorage.removeItem("authData");
+      window.location.replace("/webapp/logout");
+    }
+  </script>
   {{ end }}
 </div>

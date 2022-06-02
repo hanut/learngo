@@ -68,6 +68,7 @@ button.fab:hover {
 }
 .phead .actions a:hover {
   border-bottom: 1px solid #000;
+  cursor: pointer;
 }
 
 #actionDlg {
@@ -104,4 +105,8 @@ button.fab:hover {
   display: flex;
   flex: 1;
   align-items: center;
+}
+#formLoader{
+  margin: 0 auto;
+  text-align: center;
 }

@@ -7,7 +7,8 @@ import (
 
 func InitJwt(app *fiber.App) {
 	jwtMW := jwtMiddleware.New(jwtMiddleware.Config{
-		SigningKey: []byte("replace this with an actual key"),
+
+		SigningKey: []byte("secret"),
 	})
 	// Apply the middleware to as many routes as needed
 	app.Use("/users", jwtMW)

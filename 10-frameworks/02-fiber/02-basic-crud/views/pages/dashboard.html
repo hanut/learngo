@@ -13,9 +13,9 @@
       <td>{{ $uid }}</td>
       <td>{{ $user.FirstName }} {{ $user.LastName }}</td>
       <td>
-        <a class="actionBtn" onclick="viewUser();">View</a>
-        <a class="actionBtn" onclick="editUser();">Edit</a>
-        <a class="actionBtn" onclick="removeUser();">Remove</a>
+        <a class="actionBtn" onclick="viewUser({{ $uid }});">View</a>
+        <a class="actionBtn" onclick="editUser({{ $uid }});">Edit</a>
+        <a class="actionBtn" onclick="removeUser({{ $uid }});">Remove</a>
       </td>
     </tr>
   {{ end }}
@@ -25,7 +25,10 @@
 <div id="actionDlg" class="hide">
   <h2>User Details</h2>
   <hr/>
-  <form>
+  <div id="formLoader">
+    <img src="/loader.gif" height="275" width="275" alt="loader" />
+  </div>
+  <form id="userForm">
     <div class="form-control">
       <label for="firstName">First Name</label>
       <input required id="firstName" name="firstName" placeholder="Users first name..." />
@@ -36,7 +39,7 @@
     </div>
     <div class="form-control">
       <label for="password">Password</label>
-      <input required type="password" id="password" name="password" placeholder="Users password..." />
+      <input required id="password" name="password" placeholder="Users password..." />
     </div>
     <div class="form-control">
       <label for="age">Age</label>
@@ -55,6 +58,7 @@
         <option value="employee">Employee</option>
       </select>
     </div>
-    <button type="submit">Save</button>
+    <button id="saveBtn" type="submit">Save</button>
+    <button id="closeBtn" type="button">Close</button>
   </form>
 </div>

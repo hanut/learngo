@@ -43,7 +43,7 @@ func UserController(r fiber.Router) {
 		if err != nil {
 			return fiber.NewError(400, err.Error())
 		}
-		return c.JSON(u)
+		return c.Status(200).JSON(u)
 	})
 
 	// Add a new user to the datastore if it doesnt already exist

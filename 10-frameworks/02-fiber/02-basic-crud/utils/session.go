@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
@@ -19,6 +20,7 @@ func InitSession(app *fiber.App) {
 			Port:     6379,
 			Database: 3,
 		}),
+		Expiration: time.Minute * 5,
 	})
 
 	app.Use("/webapp/dashboard", validSessionMiddleware)
