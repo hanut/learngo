@@ -13,11 +13,48 @@
       <td>{{ $uid }}</td>
       <td>{{ $user.FirstName }} {{ $user.LastName }}</td>
       <td>
-        <a href="/view/{{ $uid }}">View</a>
-        <a href="/edit/{{ $uid }}">Edit</a>
-        <a href="/remove/{{ $uid }}">Remove</a>
+        <a class="actionBtn" onclick="viewUser();">View</a>
+        <a class="actionBtn" onclick="editUser();">Edit</a>
+        <a class="actionBtn" onclick="removeUser();">Remove</a>
       </td>
     </tr>
   {{ end }}
   </tbody>
 </table>
+<button id="addUserBtn" class="fab">➕</button>
+<div id="actionDlg" class="hide">
+  <h2>User Details</h2>
+  <hr/>
+  <form>
+    <div class="form-control">
+      <label for="firstName">First Name</label>
+      <input required id="firstName" name="firstName" placeholder="Users first name..." />
+    </div>
+    <div class="form-control">
+      <label for="lastName">Last Name</label>
+      <input required id="lastName" name="lastName" placeholder="Users last name..." />
+    </div>
+    <div class="form-control">
+      <label for="password">Password</label>
+      <input required type="password" id="password" name="password" placeholder="Users password..." />
+    </div>
+    <div class="form-control">
+      <label for="age">Age</label>
+      <input required type="number" max="120" id="age" name="age" placeholder="Users age..." />
+    </div>
+    <div class="form-control">
+      <label for="address">Address</label>
+      <textarea required id="address" name="address" placeholder="Users firstname..." ></textarea>
+    </div>
+    <div class="form-control">
+      <label for="role">Role</label>
+      <select required id="role" name="role">
+        <option disabled>Please select a role</option>
+        <option value="admin">Admin</option>
+        <option value="manager">Manager</option>
+        <option value="employee">Employee</option>
+      </select>
+    </div>
+    <button type="submit">Save</button>
+  </form>
+</div>

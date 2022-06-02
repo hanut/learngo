@@ -3,5 +3,10 @@
   <h2>UMS</h2>
   {{ else }}
   <h2>{{.Title}}</h2>
+  {{ end }} 
+  {{ if .Page }}
+  <div class="actions">
+    <a href="/webapp/logout">Logout</a>
+  </div>
   {{ end }}
 </div>

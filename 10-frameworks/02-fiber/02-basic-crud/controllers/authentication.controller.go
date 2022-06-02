@@ -54,7 +54,11 @@ func AuthenticationController(r fiber.Router) {
 		}
 		sess, err := utils.SessionStore.Get(c)
 		sess.Set("username", lf.UserId)
-		sess.SetExpiry(time.Second * 60)
+		sess.SetExpiry(time.Minute * 10)
+		err = sess.Save()
+		if err != nil {
+			return fiber.NewError(500, err.Error())
+		}
 		return c.JSON(fiber.Map{"token": t, "expiry": expat})
 	})
 

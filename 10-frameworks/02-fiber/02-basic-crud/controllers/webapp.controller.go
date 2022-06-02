@@ -1,6 +1,9 @@
 package controllers
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"github.com/gofiber/fiber/v2"
+	"hanutsingh.in/learngo/frameworks/fiber/02/utils"
+)
 
 func WebappController(r fiber.Router) {
 
@@ -21,4 +24,15 @@ func WebappController(r fiber.Router) {
 		}, "layouts/dashboard")
 	})
 
+	// Route handler for the logging out of the webapp
+	r.Get("/logout", func(c *fiber.Ctx) error {
+		s, err := utils.SessionStore.Get(c)
+		if err == nil {
+			err = s.Destroy()
+			if err != nil {
+				return fiber.NewError(500, err.Error())
+			}
+		}
+		return c.Redirect("/webapp/")
+	})
 }

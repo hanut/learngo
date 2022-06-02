@@ -4,13 +4,104 @@
   border-collapse: collapse;
   margin: 1rem 0;
 }
-.dataTable th, .dataTable td{
+.dataTable th,
+.dataTable td {
   border: 1px solid black;
   border-collapse: collapse;
   padding: 0.5rem 1rem;
 }
-.dataTable th{
+.dataTable th {
   font-weight: 700;
   background: #f7f1d2;
   text-transform: uppercase;
+}
+.dataTable tr td:last-child {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+}
+.dataTable tr td .actionBtn {
+  background: #0000;
+  flex: 1;
+}
+.dataTable tr td .actionBtn:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+button.fab {
+  height: 64px;
+  width: 64px;
+  border-radius: 64px;
+  position: fixed;
+  bottom: 6rem;
+  right: 3rem;
+  border-color: transparent;
+}
+button.fab:hover {
+  box-shadow: 3px 4px 5px 1px #d1d1d1;
+  background: #ffed86;
+}
+
+.phead {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+}
+.phead h2 {
+  display: flex;
+  flex: 1;
+  text-align: left;
+}
+.phead .actions {
+  display: flex;
+  flex: 1;
+  justify-content: flex-end;
+  align-items: center;
+}
+.phead .actions a {
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: black;
+}
+.phead .actions a:hover {
+  border-bottom: 1px solid #000;
+}
+
+#actionDlg {
+  height: 640px;
+  width: 480px;
+  position: fixed;
+  top: 4rem;
+  left: 0;
+  right: 0;
+  margin: auto;
+  padding: 2rem 1rem;
+  border: 1px solid #000;
+  box-shadow: 1px 2px 4px 1px #dfdfdf;
+  background-color: white;
+  opacity: 1;
+  transition: opacity 400ms;
+  z-index: 99999;
+}
+
+
+#actionDlg.hide {
+  opacity: 1;
+  display: none;
+}
+
+#actionDlg form .form-control {
+  display: flex;
+  flex-direction: row;
+  padding: 0.1rem 0.2rem;
+  margin-block: 1rem;
+}
+
+#actionDlg form .form-control *{
+  display: flex;
+  flex: 1;
+  align-items: center;
 }

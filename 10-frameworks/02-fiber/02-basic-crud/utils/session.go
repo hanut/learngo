@@ -15,8 +15,9 @@ func InitSession(app *fiber.App) {
 	fmt.Println("Setting up session store and middleware...")
 	SessionStore = session.New(session.Config{
 		Storage: redis.New(redis.Config{
-			Host: "localhost",
-			Port: 6379,
+			Host:     "localhost",
+			Port:     6379,
+			Database: 3,
 		}),
 	})
 
@@ -28,6 +29,9 @@ func validSessionMiddleware(c *fiber.Ctx) error {
 	if err != nil {
 		return fiber.ErrUnauthorized
 	}
-	fmt.Println("Is this a new session ?", sess.Fresh())
+	if sess.Fresh() {
+		return c.Redirect("/webapp/")
+	}
+	fmt.Println("Session Id:", sess.ID())
 	return c.Next()
 }
