@@ -29,6 +29,12 @@ const token = (() => {
 })()
 console.log("Token:", token);
 
+function addUser() {
+  disableInputs(false);
+  toggleFormLoader(false);
+  actionDlg.classList.remove("hide");
+}
+
 function viewUser(userId) {
   disableInputs(true);
   toggleFormLoader(true);
@@ -52,7 +58,7 @@ function editUser() {
 
 function removeUser() {}
 
-function dismissDlg() {
+function closeDlg() {
   actionDlg.classList.add("hide");
 }
 

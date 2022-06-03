@@ -21,7 +21,7 @@
   {{ end }}
   </tbody>
 </table>
-<button id="addUserBtn" class="fab">➕</button>
+<button id="addUserBtn" class="fab" onclick="addUser();">➕</button>
 <div id="actionDlg" class="hide">
   <h2>User Details</h2>
   <hr/>
@@ -59,6 +59,6 @@
       </select>
     </div>
     <button id="saveBtn" type="submit">Save</button>
-    <button id="closeBtn" type="button">Close</button>
+    <button id="closeBtn" type="button" onclick="closeDlg();">Close</button>
   </form>
 </div>
