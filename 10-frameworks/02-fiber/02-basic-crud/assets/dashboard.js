@@ -13,6 +13,8 @@ formLoader = document.querySelector("#formLoader"),
 closeBtn = document.querySelector("#closeBtn"),
 saveBtn = document.querySelector("#saveBtn");
 
+var mode = "";
+
 const token = (() => {
   try {
     // Retrieve the auth data from the localstorage
@@ -30,14 +32,16 @@ const token = (() => {
 console.log("Token:", token);
 
 function addUser() {
+  mode = "add";
   disableInputs(false);
-  toggleFormLoader(false);
+  showFormLoader(false);
   actionDlg.classList.remove("hide");
 }
 
 function viewUser(userId) {
+  mode = "view";
   disableInputs(true);
-  toggleFormLoader(true);
+  showFormLoader(true);
   fetch("/users/" + userId, {
     headers: {
       "Authorization": `Bearer ${token}`
@@ -46,20 +50,41 @@ function viewUser(userId) {
     .then((r) => r.json())
     .then((r) => {
       fillValues(r);
+      showFormLoader(false);
       actionDlg.classList.remove("hide");
     })
     .catch(console.warn);
 }
 
 function editUser() {
+  mode = "view";
   disableInputs(false);
 
 }
 
 function removeUser() {}
 
+function save() {
+  showFormLoader(true);
+  const user = {
+    FirstName: fname.value,
+    LastName: lname.value,
+    Password: password.value,
+    Age: age.value,
+    Address: address.value,
+    Role: role.value,
+  };
+  console.log(user);
+  try {
+    // save the user
+  } catch(error) {
+    console.warn(error)
+  }
+}
+
 function closeDlg() {
   actionDlg.classList.add("hide");
+  userForm.reset();
 }
 
 function fillValues(user) {
@@ -80,12 +105,12 @@ function disableInputs(state = true) {
   role.disabled = state;
 }
 
-function toggleFormLoader(shown = true) {
+function showFormLoader(shown = false) {
   if (shown) {
-    formLoader.style.display = "none";
-    userForm.style.display = "block";
-  } else {
     formLoader.style.display = "block";
     userForm.style.display = "none";
+  } else {
+    formLoader.style.display = "none";
+    userForm.style.display = "block";
   }
 }
