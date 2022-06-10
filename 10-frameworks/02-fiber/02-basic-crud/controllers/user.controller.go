@@ -85,7 +85,7 @@ func UserController(r fiber.Router) {
 		if err != nil {
 			return fiber.NewError(400, err.Error())
 		}
-		return c.SendStatus(fiber.StatusOK)
+		return c.JSON(true)
 	})
 
 }

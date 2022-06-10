@@ -2,16 +2,17 @@ var actionDlg, fname, lname, age, address, password, role;
 
 console.log("Loaded dashboard");
 var actionDlg = document.querySelector("#actionDlg"),
-fname = document.querySelector("#firstName"),
-lname = document.querySelector("#lastName"),
-age = document.querySelector("#age"),
-address = document.querySelector("#address"),
-password = document.querySelector("#password"),
-role = document.querySelector("#role"),
-userForm = document.querySelector("#userForm"),
-formLoader = document.querySelector("#formLoader"),
-closeBtn = document.querySelector("#closeBtn"),
-saveBtn = document.querySelector("#saveBtn");
+  fname = document.querySelector("#firstName"),
+  lname = document.querySelector("#lastName"),
+  age = document.querySelector("#age"),
+  address = document.querySelector("#address"),
+  password = document.querySelector("#password"),
+  role = document.querySelector("#role"),
+  userForm = document.querySelector("#userForm"),
+  formLoader = document.querySelector("#formLoader"),
+  closeBtn = document.querySelector("#closeBtn"),
+  saveBtn = document.querySelector("#saveBtn"),
+  formError = document.querySelector("#formError");
 
 var mode = "";
 
@@ -19,20 +20,20 @@ const token = (() => {
   try {
     // Retrieve the auth data from the localstorage
     let authData = JSON.parse(localStorage.getItem("authData"));
-    let timeLeft = ((authData.expiry*1000) - Date.now())/1000;
+    let timeLeft = (authData.expiry * 1000 - Date.now()) / 1000;
     if (timeLeft < 30) {
       throw new Error("Token expired");
     }
     return authData.token;
-  } catch(error) {
+  } catch (error) {
     console.warn(error);
     window.location.replace("/webapp");
   }
-})()
-console.log("Token:", token);
+})();
 
 function addUser() {
   mode = "add";
+  saveBtn.style.display = "inline-block";
   disableInputs(false);
   showFormLoader(false);
   actionDlg.classList.remove("hide");
@@ -40,31 +41,81 @@ function addUser() {
 
 function viewUser(userId) {
   mode = "view";
-  disableInputs(true);
+  saveBtn.style.display = "none";
   showFormLoader(true);
+  actionDlg.classList.remove("hide");
   fetch("/users/" + userId, {
     headers: {
-      "Authorization": `Bearer ${token}`
-    }
+      Authorization: `Bearer ${token}`,
+    },
   })
-    .then((r) => r.json())
+    .then((r) => {
+      if (r.status !== 200) {
+        throw new Error(r.statusText);
+      }
+      return r.json();
+    })
     .then((r) => {
       fillValues(r);
+      disableInputs(true);
       showFormLoader(false);
-      actionDlg.classList.remove("hide");
     })
-    .catch(console.warn);
+    .catch((error) => {
+      flashError(error).then(() => {
+        actionDlg.classList.add("hide");
+      });
+    });
 }
 
-function editUser() {
-  mode = "view";
-  disableInputs(false);
+function editUser(userId) {
+  mode = "edit";
+  saveBtn.style.display = "inline-block";
+  showFormLoader(true);
+  actionDlg.classList.remove("hide");
 
+  fetch("/users/" + userId, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+    .then((r) => {
+      if (r.status !== 200) {
+        throw new Error(r.statusText);
+      }
+      return r.json();
+    })
+    .then((r) => {
+      fillValues(r);
+      disableInputs(false);
+      showFormLoader(false);
+    })
+    .catch((error) => {
+      flashError(error).then(() => {
+        actionDlg.classList.add("hide");
+      });
+    });
 }
 
-function removeUser() {}
+function removeUser(userId) {
+  const response = confirm("Are you sure you want to delete that user ?");
+  if (!response) return;
+  fetch("/users/" + userId, {
+    method: "delete",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+    .then((r) => {
+      console.log(r.status, r.statusText);
+      return r.text();
+    })
+    .then((r) => window.location.reload())
+    .catch(flashError);
+}
 
-function save() {
+function save(e) {
+  console.log("event", e);
+  e.preventDefault();
   showFormLoader(true);
   const user = {
     FirstName: fname.value,
@@ -74,15 +125,26 @@ function save() {
     Address: address.value,
     Role: role.value,
   };
-  console.log(user);
   try {
     // save the user
-  } catch(error) {
-    console.warn(error)
+    if (mode === "add") {
+      fetch("/users", {
+        method: "post",
+        body: JSON.stringify(user),
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    } else {
+      alert("TODO");
+    }
+  } catch (error) {
+    console.warn(error);
   }
 }
 
 function closeDlg() {
+  console.log(mode);
   actionDlg.classList.add("hide");
   userForm.reset();
 }
@@ -113,4 +175,14 @@ function showFormLoader(shown = false) {
     formLoader.style.display = "none";
     userForm.style.display = "block";
   }
+}
+
+function flashError(errorMsg, time = 3) {
+  formError.innerHTML = errorMsg;
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      formError.innerHTML = "";
+      resolve();
+    }, time * 1000);
+  });
 }

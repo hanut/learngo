@@ -88,7 +88,6 @@ button.fab:hover {
   z-index: 99999;
 }
 
-
 #actionDlg.hide {
   opacity: 1;
   display: none;
@@ -101,12 +100,17 @@ button.fab:hover {
   margin-block: 1rem;
 }
 
-#actionDlg form .form-control *{
+#actionDlg form .form-control * {
   display: flex;
   flex: 1;
   align-items: center;
 }
-#formLoader{
+#formLoader {
   margin: 0 auto;
   text-align: center;
+}
+#formError {
+  color: red;
+  font-size: 18px;
+  display: block;
 }

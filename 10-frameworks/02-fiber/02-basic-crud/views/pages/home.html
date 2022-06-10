@@ -1,7 +1,13 @@
 <h1 style="text-align: center; margin-top: 1rem">Login Required</h1>
 <div>
   <form class="loginForm">
-    <input type="text" id="userId" name="userid" placeholder="Userid...." value="superadmin"/>
+    <input
+      type="text"
+      id="userId"
+      name="userid"
+      placeholder="Userid...."
+      value="superadmin"
+    />
     <input
       type="password"
       id="password"
@@ -12,7 +18,10 @@
     <button type="button" onclick="login()">Login</button>
   </form>
   <script>
+    var isBusy = false;
     function login() {
+      if (isBusy) return;
+      isBusy = true;
       const uid = document.querySelector("#userId").value;
       const pass = document.querySelector("#password").value;
       if (uid.length === 0 || uid.trim() === "") {
@@ -36,7 +45,10 @@
           localStorage.setItem("authData", JSON.stringify(r));
           window.location.replace("/webapp/dashboard");
         })
-        .catch(console.warn);
+        .catch(console.warn)
+        .finally(() => {
+          isBusy = true;
+        });
     }
   </script>
 </div>
