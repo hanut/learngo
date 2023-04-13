@@ -2,8 +2,9 @@ package controllers
 
 import (
 	"fmt"
+	"strings"
 
-	"github.com/go-playground/validator"
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"hanutsingh.in/learngo/frameworks/fiber/02/database"
 	models "hanutsingh.in/learngo/frameworks/fiber/02/database/models"
@@ -50,6 +51,7 @@ func UserController(r fiber.Router) {
 	r.Post("/", func(c *fiber.Ctx) error {
 		var user models.User
 		if err := c.BodyParser(&user); err != nil {
+			fmt.Println(err, c.Body())
 			return fiber.NewError(400, err.Error())
 		}
 		errors := func() string {
@@ -66,6 +68,39 @@ func UserController(r fiber.Router) {
 			return fiber.NewError(400, errors)
 		}
 		uid, err := UserStore.AddUser(user)
+		if err != nil {
+			return fiber.NewError(400, err.Error())
+		}
+		return c.JSON(fiber.Map{uid: uid})
+	})
+
+	// Replace an existing valid user instance with an updated one
+	r.Put("/:userId", func(c *fiber.Ctx) error {
+		uid := strings.Clone(c.Params("userId", ""))
+		fmt.Println("Updating userId", uid)
+		if uid == "" {
+			return fiber.ErrNotFound
+		}
+		var user models.User
+		if err := c.BodyParser(&user); err != nil {
+			fmt.Println(err, c.Body())
+			return fiber.NewError(400, err.Error())
+		}
+		errors := func() string {
+			var errors string
+			err := validate.Struct(user)
+			if err != nil {
+				for _, err := range err.(validator.ValidationErrors) {
+					fmt.Println("Validation Error:", err)
+					errors += fmt.Sprintf("%s\t%s\t%s\n", err.StructNamespace(), err.Tag(), err.Param())
+				}
+			}
+			return errors
+		}()
+		if errors != "" {
+			return fiber.NewError(400, errors)
+		}
+		err := UserStore.ReplaceUser(uid, user)
 		if err != nil {
 			return fiber.NewError(400, err.Error())
 		}

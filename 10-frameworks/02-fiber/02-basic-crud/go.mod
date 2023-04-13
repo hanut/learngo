@@ -2,7 +2,10 @@ module hanutsingh.in/learngo/frameworks/fiber/02
 
 go 1.18
 
-require github.com/gofiber/fiber/v2 v2.33.0
+require (
+	github.com/gofiber/fiber/v2 v2.33.0
+	github.com/golang-jwt/jwt/v4 v4.4.1
+)
 
 require (
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
@@ -10,7 +13,6 @@ require (
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-redis/redis/v8 v8.11.5 // indirect
-	github.com/golang-jwt/jwt/v4 v4.4.1 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292 // indirect
 	golang.org/x/text v0.3.7 // indirect
@@ -18,7 +20,6 @@ require (
 
 require (
 	github.com/andybalholm/brotli v1.0.4 // indirect
-	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/go-playground/validator/v10 v10.11.0
 	github.com/gofiber/jwt/v3 v3.2.11
 	github.com/gofiber/storage/redis v0.0.0-20220518112136-6fd94ebd5acd

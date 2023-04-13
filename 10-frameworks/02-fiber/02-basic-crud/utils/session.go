@@ -34,6 +34,5 @@ func validSessionMiddleware(c *fiber.Ctx) error {
 	if sess.Fresh() {
 		return c.Redirect("/webapp/")
 	}
-	fmt.Println("Session Id:", sess.ID())
 	return c.Next()
 }

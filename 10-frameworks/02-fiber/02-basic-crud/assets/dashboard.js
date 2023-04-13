@@ -14,9 +14,12 @@ var actionDlg = document.querySelector("#actionDlg"),
   saveBtn = document.querySelector("#saveBtn"),
   formError = document.querySelector("#formError");
 
-var mode = "";
+var mode = "",
+  activeUserId = undefined;
 
-const token = (() => {
+actionDlg.onclick = closeDlg();
+
+const { token, hasTokenExpired } = (() => {
   try {
     // Retrieve the auth data from the localstorage
     let authData = JSON.parse(localStorage.getItem("authData"));
@@ -24,7 +27,20 @@ const token = (() => {
     if (timeLeft < 30) {
       throw new Error("Token expired");
     }
-    return authData.token;
+    const ivl = setInterval(() => {
+      timeLeft = (authData.expiry * 1000 - Date.now()) / 1000;
+      if (timeLeft < 30) {
+        timeLeft = 0;
+        clearInterval(ivl);
+      }
+    }, 15000 + Math.round(Math.random() * 100));
+    const hasTokenExpired = () => {
+      if (timeLeft < 30) {
+        return true;
+      }
+      return false;
+    };
+    return { token: authData.token, hasTokenExpired };
   } catch (error) {
     console.warn(error);
     window.location.replace("/webapp");
@@ -40,6 +56,7 @@ function addUser() {
 }
 
 function viewUser(userId) {
+  authCheck();
   mode = "view";
   saveBtn.style.display = "none";
   showFormLoader(true);
@@ -68,11 +85,11 @@ function viewUser(userId) {
 }
 
 function editUser(userId) {
+  authCheck();
   mode = "edit";
   saveBtn.style.display = "inline-block";
   showFormLoader(true);
   actionDlg.classList.remove("hide");
-
   fetch("/users/" + userId, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -88,6 +105,7 @@ function editUser(userId) {
       fillValues(r);
       disableInputs(false);
       showFormLoader(false);
+      activeUserId = userId;
     })
     .catch((error) => {
       flashError(error).then(() => {
@@ -97,6 +115,8 @@ function editUser(userId) {
 }
 
 function removeUser(userId) {
+  authCheck();
+
   const response = confirm("Are you sure you want to delete that user ?");
   if (!response) return;
   fetch("/users/" + userId, {
@@ -109,19 +129,19 @@ function removeUser(userId) {
       console.log(r.status, r.statusText);
       return r.text();
     })
-    .then((r) => window.location.reload())
+    .then(() => window.location.reload())
     .catch(flashError);
 }
 
 function save(e) {
-  console.log("event", e);
+  authCheck();
   e.preventDefault();
   showFormLoader(true);
   const user = {
     FirstName: fname.value,
     LastName: lname.value,
     Password: password.value,
-    Age: age.value,
+    Age: parseInt(age.value),
     Address: address.value,
     Role: role.value,
   };
@@ -133,20 +153,54 @@ function save(e) {
         body: JSON.stringify(user),
         headers: {
           Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
-      });
+      })
+        .then((r) => r.json())
+        .then((r) => {
+          console.log(r);
+          alert("Saved !");
+          window.location.reload();
+        })
+        .catch((error) => {
+          flashError(error).then(() => {
+            actionDlg.classList.add("hide");
+          });
+        });
     } else {
-      alert("TODO");
+      fetch("/users/" + activeUserId, {
+        method: "put",
+        body: JSON.stringify(user),
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      })
+        .then((r) => r.json())
+        .then((r) => {
+          console.log(r);
+          alert("Saved !");
+          window.location.reload();
+        })
+        .catch((error) => {
+          flashError(error).then(() => {
+            actionDlg.classList.add("hide");
+          });
+        });
     }
   } catch (error) {
-    console.warn(error);
+    flashError(error).then(() => {
+      actionDlg.classList.add("hide");
+    });
   }
+  return false;
 }
 
 function closeDlg() {
-  console.log(mode);
   actionDlg.classList.add("hide");
   userForm.reset();
+  actionDlg.onclick = undefined;
+  activeUserId = undefined;
 }
 
 function fillValues(user) {
@@ -185,4 +239,11 @@ function flashError(errorMsg, time = 3) {
       resolve();
     }, time * 1000);
   });
+}
+
+function authCheck() {
+  if (hasTokenExpired()) {
+    alert("Token expired !!!");
+    window.location.replace("/webapp/logout");
+  }
 }

@@ -13,7 +13,7 @@ type User struct {
 	Password  string `validate:"required,min=8,max=16,ascii"`
 	Age       uint8  `validate:"required,gte=0,lte=150"`
 	Address   string `validate:"required,min=5,max=256"`
-	Role      string `validate:"required,alpha,oneof='admin,manager,employee',min=5,max=12"`
+	Role      string `validate:"required,alpha,oneof='admin' 'manager' 'employee',min=5,max=12"`
 }
 
 type UserList map[string]User
@@ -37,6 +37,7 @@ func (ul UserList) AddUser(u User) (string, error) {
 	if ok {
 		return hash, errors.New("User already exists in the database")
 	}
+
 	ul[hash] = u
 	return hash, nil
 }
@@ -54,10 +55,12 @@ func (ul UserList) RemoveUser(id string) error {
 // ReplaceUser searches for a user by id and replaces the values with
 // the new user object passed in as an argument
 func (ul UserList) ReplaceUser(id string, u User) error {
-	u, ok := ul[id]
+	_, ok := ul[id]
 	if !ok {
 		return errors.New("Error: User not found")
 	}
+	fmt.Println("Before Switch", ul[id])
 	ul[id] = u
+	fmt.Println("After Switch", ul[id])
 	return nil
 }
